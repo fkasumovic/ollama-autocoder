@@ -15,6 +15,7 @@ let responsePreview: boolean | undefined;
 let responsePreviewMaxTokens: number;
 let responsePreviewDelay: number;
 let continueInline: boolean | undefined;
+let bearerToken: string;
 
 function updateVSConfig() {
 	VSConfig = vscode.workspace.getConfiguration("ollama-autocoder");
@@ -29,6 +30,7 @@ function updateVSConfig() {
 	responsePreviewDelay = VSConfig.get("preview delay") || 0; // Must be || 0 instead of || [default] because of truthy
 	continueInline = VSConfig.get("continue inline");
 	apiTemperature = VSConfig.get("temperature") || 0;
+	bearerToken = VSConfig.get("bearer") || "";
 }
 
 updateVSConfig();
@@ -89,7 +91,8 @@ async function autocompleteCommand(textEditor: vscode.TextEditor, cancellationTo
 						temperature: apiTemperature,
 						stop: ["```"],
 						num_ctx: Math.min(completeInput.length, 1_048_000) // Assumes absolute worst case of 1 char = 1 token
-					}
+					},
+					headers: {'Authorization: Bearer ' + bearerToken}
 				}, {
 					cancelToken: axiosCancelToken,
 					responseType: 'stream'
